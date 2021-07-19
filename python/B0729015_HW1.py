@@ -16,7 +16,7 @@ def jieba_cal():
     f.close()
     return result
 
-def cal_single_sentence(word_list):     #�p��C�g�峹���ӧO�Ҧ������W�v
+def cal_single_sentence(word_list):     #
     word_freq_list = []
     word_list_len = len(word_list)
     
@@ -30,7 +30,7 @@ def cal_single_sentence(word_list):     #�p��C�g�峹���ӧO�Ҧ�
         
     return word_freq_list
 
-def cal_all_word_num(word_list):         #�p���@�峹�`����
+def cal_all_word_num(word_list):         #
     count_list = []
         
     for i in range(0,len(word_list)):
@@ -38,7 +38,7 @@ def cal_all_word_num(word_list):         #�p���@�峹�`����
 
     return count_list
  
-def tf_algorithm(word_freq_list, count_list): #�Y�@���y�X�{�����ư��H���ɮת��`���y��
+def tf_algorithm(word_freq_list, count_list): #
     freq_list = []
     length = len(word_freq_list)
     
@@ -51,9 +51,9 @@ def tf_algorithm(word_freq_list, count_list): #�Y�@���y�X�{���
     return freq_list
 
 
-def idf_algorithm(word_freq_list):  #�ɮ��`�ơA���H�X�{�Y�@�_�����ɮ׼�
+def idf_algorithm(word_freq_list):  #
 
-    length = len(word_freq_list) #�ɮ��`��
+    length = len(word_freq_list) #
     all_word = []
     ifd_dict = dict()
     temp = dict()
