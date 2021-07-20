@@ -16,7 +16,7 @@ def jieba_cal():
     f.close()
     return result
 
-def cal_single_sentence(word_list):     #
+def cal_single_sentence(word_list):     
     word_freq_list = []
     word_list_len = len(word_list)
     
