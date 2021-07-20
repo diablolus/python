@@ -72,7 +72,7 @@ def idf_algorithm(word_freq_list):  #
     
     return ifd_dict
 
-def tfidf_algorithm(tf_num,idf_num):
+def tfidf_algorithm(tf_num,idf_num): #
     tfidf_num = []
 
     for i in range(0,len(tf_num)):
