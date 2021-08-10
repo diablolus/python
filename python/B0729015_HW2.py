@@ -17,7 +17,7 @@ def get_movie_address_main():
     url = "https://movies.yahoo.com.tw/moviegenre_result.html?"
     movie_address = []
     
-    for web_id in range(1, 5):
+    for web_id in range(1, 2):
         address_main = url+"genre_id="+str(web_id)
         soup = get_soup(address_main)
         movie_address.extend(get_movie_address(soup))
@@ -27,7 +27,7 @@ def get_movie_address_main():
         local2 = length_str.find("筆")
         length = math.ceil(int(length_str[local1+1:local2])/10)
         #length = 3
-        
+        print(length)
         for page in range(2, length):
             address_mov = address_main + "&page=" + str(page)
             soup = get_soup(address_mov)
@@ -60,7 +60,7 @@ def get_movie_info(address):
         length = info1.findAll('span')[1].text[5:]
         company = info1.findAll('span')[2].text[5:]
         imdb = info1.findAll('span')[3].text[7:]
-        director = info1.find('div', class_ = 'movie_intro_list').text.strip().replace('\n', '').replace('\r', '')
+        director = info1.find('div', class_ = 'movie_intro_list').text.strip().replace('\n', '').replace('\r', '').replace(" ", "")
         actor = info1.findAll('div', class_ = 'movie_intro_list')[1].text.strip().replace(" ", "").replace('\n', '').replace('\r', '')
         
     for info2 in desc_info:
@@ -71,6 +71,9 @@ def get_movie_info(address):
         for x in temp:
             tag = x.text.strip()
             break
+    
+    if title_en == " ":
+        title_en = "None"
         
     data[title] = [title_en, tag, date, length, company, imdb, director, actor, desc]
     return data
@@ -82,15 +85,15 @@ def main():
     
     for i in range(0, len(address_list)):
         movie_info = {**movie_info, **get_movie_info(address_list[i])}
-        print(i)
-            
+        
+    print(movie_info)    
     with open('dct.csv', 'w', newline='', encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(["movie No.", "Name", "Name_en", "Tag", "Date", "Length", "Company", "Imdb", "Director", "Actor", "Desc"])
-        i = 1
+        j = 1
         for title,data in movie_info.items():
-            writer.writerow([i, title, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]])
-            i += 1
+            writer.writerow([j, title, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]])
+            j += 1
         
 if __name__== "__main__":
     main() 
