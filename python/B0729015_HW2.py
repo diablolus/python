@@ -8,11 +8,11 @@ import csv
 def get_soup(address):
     user_agent = UserAgent()
     proxy_list = [
-        'http://138.68.60.8:8080',
-        'http://209.97.150.167:8080',
-        'http://191.96.42.80:8080',
-        'http://198.199.86.11:3128',
+        'http://34.138.225.120:8888',
         'http://35.232.28.68:8080',
+        'http://69.78.101.142:443',
+        'http://198.199.86.11:3128',
+        'http://34.121.55.127:8080',
         'http://170.106.175.94:80',
         'http://52.149.152.236:80',
     ]
@@ -41,7 +41,7 @@ def get_movie_address_main():
     url = "https://movies.yahoo.com.tw/moviegenre_result.html?"
     movie_address = []
     
-    for web_id in range(1, 6):
+    for web_id in range(1, 5):
         address_main = url+"genre_id="+str(web_id)
         soup = get_soup(address_main)
         movie_address.extend(get_movie_address(soup))
@@ -74,8 +74,11 @@ def get_movie_info(address):
     desc_info = soup.select("span#story")
     type_info = soup.select('div.level_name_box')
     
+    if main_info is None or desc_info is None or type_info is None:
+        return False
+    
     data = dict()
-  
+    
     for info1 in main_info:
         movie_name = info1.find('h1').text.strip()
         movie_date = info1.findAll('span')[0].text[5:].strip()
@@ -89,12 +92,10 @@ def get_movie_info(address):
         movie_desc = info2.text.strip().replace('\n', '')
     
     for info3 in type_info:
-        temp = info3.findAll('a', class_ ="gabtn")
-        for x in temp:
-            movie_tag = x.text.strip()
-            break
+        movie_tag = info3.findAll('a', class_ ="gabtn")[0]
         
     data[movie_name] = [movie_tag, movie_date, movie_length, movie_company, movie_imdb, movie_director, movie_actor, movie_desc]
+    
     return data
     
 def main():
@@ -108,6 +109,11 @@ def main():
         j = 1
         for i in range(0, len(address_list)):
             movie_info = get_movie_info(address_list[i])
+            
+            if movie_info == False:
+                print("false")
+                continue
+            
             print(j)
             for mov_title, mov_data in movie_info.items():
                 writer.writerow([j, mov_title, mov_data[0], mov_data[1], mov_data[2], mov_data[3], mov_data[4], mov_data[5], mov_data[6], mov_data[7]])
