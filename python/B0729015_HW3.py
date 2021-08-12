@@ -5,18 +5,18 @@ import math
 def get_movie_data(name):           #取得desc資料
     movie_data = dict()
     
-    with open(name, newline='') as csvfile:
+    with open(name, newline='', encoding="utf-8") as csvfile:
         rows = csv.DictReader(csvfile)
         for row in rows:
             if row['movie No.'] != "None" and row['Desc'] != " ":
-                movie_data[row['movie No.']] = row['Desc']
+                movie_data[row['movie No.']] = row['Desc'] + row['Date'] + row['Director'] + row['Actor']
                 
     return movie_data
 
 def get_movie_tag(name):            #取得tag資料
     movie_tag = dict()
     
-    with open(name, newline='') as csvfile:
+    with open(name, newline='', encoding="utf-8") as csvfile:
         rows = csv.DictReader(csvfile)
         for row in rows:
             if row['movie No.'] != None and row['Tag'] != " ":
@@ -26,10 +26,10 @@ def get_movie_tag(name):            #取得tag資料
 
 def jieba_cal(data):
     word = dict()
-    jieba.set_dictionary('dict.txt')
+    #jieba.set_dictionary('dict.txt')
 
     for key,value in data.items():
-        sentence = jieba.lcut(value, cut_all=False)
+        sentence = jieba.lcut(value)
         word[key] = sentence
    
     return word
@@ -104,11 +104,11 @@ def calc_distance(point1, point2):
                   
     return math.sqrt(point_dist)
 
-def calc_distance_main(tfidf_data):
+def calc_distance_main(tfidf_data, start, end):
     length = len(tfidf_data)
     dist = dict()
     
-    for i in range(1, length+1):
+    for i in range(start, end+1):
         temp = dict()
         
         for j in range(1, length+1):
@@ -138,7 +138,8 @@ def get_neighbors(distance, k):
                 value.pop(min_item)
                 
         neighbor[key] = temp
-        
+    
+    print("get_neighbors is completed")     
     return neighbor
 
 #判斷start~end個點最近鄰居最多的類別        
@@ -147,7 +148,7 @@ def get_tag(neighbor, movie_tag, start, end):
     
     for i in range(start, end+1):
         temp_tag = dict()
-        print(neighbor[str(i)])
+        
         for k in neighbor[str(i)]:
             if movie_tag[k] not in temp_tag:
                 temp_tag[movie_tag[k]] = 1
@@ -156,33 +157,40 @@ def get_tag(neighbor, movie_tag, start, end):
 
         guess_tag[str(i)] = max(temp_tag, key=temp_tag.get)
     
+    print("get_tag is completed")  
     return guess_tag
 
-def pred_result(guess_tag, movie_tag, length):
+def pred_result(guess_tag, movie_tag, num):
     correct = 0
     for k, v in guess_tag.items():
         if v == movie_tag[k]:
             correct += 1
             
-    print(correct/length)   
+    print("算法精準度:",correct/num) 
+    return correct/num
     
 def main():
-    name = "dct1.csv"
-    movie_data = get_movie_data(name)  
-    movie_tag = get_movie_tag(name)
+    file_name = "dct.csv"
+    start = 5500
+    end = 6000
+    num = end - start
+    
+    #取得測試資料
+    movie_data = get_movie_data(file_name)  
+    movie_tag = get_movie_tag(file_name)
     word_dict = jieba_cal(movie_data)
     
+    #TF-IDF計算
     tf = tf_algorithm(word_dict)
     idf = idf_algorithm(word_dict,tf)
     tfidf = tfidf_algorithm(tf, idf)
     
-    #400筆資料，取100筆作測試
-    distance = calc_distance_main(tfidf)
+    distance = calc_distance_main(tfidf, start, end)
+    neighbor = get_neighbors(distance, 17)
     
-    neighbor = get_neighbors(distance, 11)
-    guess_tag = get_tag(neighbor, movie_tag, 300, 400)
-    
-    pred_result(guess_tag, movie_tag, 100)
+    #6000筆資料，取500筆作測試，算出預測成功率
+    guess_tag = get_tag(neighbor, movie_tag, start, end)
+    pred_result(guess_tag, movie_tag, num)
   
 if __name__== "__main__":
     main() 
