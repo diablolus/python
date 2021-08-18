@@ -1,7 +1,7 @@
 import os
 import json
 import jieba
-from string import punctuation
+import re
 from opencc import OpenCC
 from gensim.models import word2vec, fasttext
 import logging
@@ -22,56 +22,57 @@ def get_file_path(folder_path):     #取得wiki所有檔案路徑
 
 def get_file_contents(file_path):   #取得wiki所有text
     all_contents = []
+    rule = '[a-zA-Z0-9’!"#$%&\'()*+,-./:;<=>?@，。?★、…【】《》？“”‘’！[\\]^_`{|}~]+'    #資料處理規則
+
     for path in file_path:
         with open(path, mode='r', encoding="utf-8") as file:
             unformatted_text = file.readlines()
             
             for line in unformatted_text:  
                 json_text = json.loads(line)
-                formatted_text = json_text["text"].strip().replace('\n', '').replace('\r', '').replace(" ", "")
+                formatted_text = re.sub(rule, '', json_text["text"].replace('\n', ''))
                 all_contents.append(formatted_text)
         
     print("get_file_contents")
     return all_contents
 
-def trans_text(contents):           #翻譯簡中文字
-    cc = OpenCC('s2twp')
-    trans_text = []
-    
-    for text in contents:
-        result = cc.convert(text)
-        trans_text.append(result)
-    
-    print("trans_text")
-    return trans_text
-
-def jieba_cal(data):
-    jieba.set_dictionary('dict.txt')
+def jieba_cal(data, origin_file):
     word_set = set()
     
-    #資料處理規則
-    add_punc='，。、【 】 “”：；·（）《》‘’{}？!?~/！⑦()、%^>℃：.”“^-——=&#@￥」「'
-    add2_punc = '的之'
-    all_punc = punctuation + add_punc + add2_punc
+    with open(origin_file , mode='w', encoding="utf-8") as file:
+        for value in data:
+            temp = jieba.lcut(value)
     
-    for value in data:
-        temp = jieba.lcut(value, cut_all=False)
-        for word in temp:
-            if word in all_punc:
-                continue
-            elif word not in word_set:
+            for word in temp:
+                if word in word_set:
+                    continue
+                
+                file.writelines(word+"\n")
                 word_set.add(word)
         
     print("jieba_cal")
-    return word_set
+    return
+
+def trans_text(origin_data, trans_data):           #翻譯簡中文字
+    cc = OpenCC('s2twp')
+    
+    with open(origin_data , mode='r', encoding="utf-8") as input_data:
+        with open(trans_data , mode='w', encoding="utf-8") as output_data:
+            for text in input_data.readlines():
+                result = cc.convert(text)
+                output_data.writelines(result)
+    
+    print("trans_text")
+    return
 
 def training_model(input_file):
     print("training")
+
     # Settings
-    seed = 812
+    seed = 666
     sg = 0
     window_size = 5
-    vector_size = 300
+    vector_size = 100
     min_count = 1
     workers = 8
     epochs = 5
@@ -99,18 +100,15 @@ def training_model(input_file):
  
 def main():
     data_path = './wiki_zh/'        #wiki資料路徑
+    origin_file = "untranslated.txt"
     training_file = "training_data.txt"
     
     all_file_path = get_file_path(data_path)
     all_contents = get_file_contents(all_file_path)
-    trans_data = trans_text(all_contents)
-    training_set = jieba_cal(trans_data)
+    jieba_cal(all_contents, origin_file)
+    trans_text(origin_file ,training_file)
         
     print("DataSet is completed")
-    
-    with open(training_file , mode='w', encoding="utf-8") as file:
-        for word in training_set:
-            file.writelines(word+"\n")
     
     training_model(training_file)
 
