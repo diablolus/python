@@ -71,12 +71,12 @@ def training_model(input_file):
     # Settings
     seed = 666
     sg = 0
-    window_size = 5
-    vector_size = 100
+    window_size = 20
+    vector_size = 50
     min_count = 1
     workers = 8
     epochs = 5
-    batch_words = 10000
+    batch_words = 100000
     
     # Train
     train_data = word2vec.LineSentence(input_file)
@@ -92,25 +92,30 @@ def training_model(input_file):
         batch_words=batch_words,
     )
     
-    for item in model.wv.most_similar('李知恩'):
+    for item in model.wv.most_similar('李知恩', topn=20):
         print(item)
         
     model.save('t.model')
     return
  
+"""def using_model():
+    model = models.Word2Vec.load('word2vec.model')"""
+    
+
 def main():
     data_path = './wiki_zh/'        #wiki資料路徑
     origin_file = "untranslated.txt"
     training_file = "training_data.txt"
     
-    all_file_path = get_file_path(data_path)
+    #取得資料集
+    """all_file_path = get_file_path(data_path)
     all_contents = get_file_contents(all_file_path)
     jieba_cal(all_contents, origin_file)
-    trans_text(origin_file ,training_file)
+    trans_text(origin_file ,training_file)"""
         
     print("DataSet is completed")
     
     training_model(training_file)
-
+    
 if __name__== "__main__":
     main() 
