@@ -63,25 +63,15 @@ def training_model(input_file):
     print("training")
 
     # Settings
-    seed = 432
     sg = 0
-    window_size = 10
-    vector_size = 100
-    min_count = 5
-    epochs = 10
-    batch_words = 100000
+    min_count = 10
     
     # Train
     train_data = word2vec.LineSentence(input_file)
     model = fasttext.FastText(
         train_data,
         min_count=min_count,
-        vector_size =vector_size,
-        epochs=epochs,
-        window=window_size,
         sg=sg,
-        seed=seed,
-        batch_words=batch_words,
     )
     
     for item in model.wv.most_similar('李知恩', topn=20):
