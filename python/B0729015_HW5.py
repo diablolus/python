@@ -8,7 +8,7 @@ class Seq2Seq:
     def __init__(self):
         self.N_UNITS = 256
         self.BATCH_SIZE = 32
-        self.EPOCH = 600
+        self.EPOCH = 1200
         self.NUM_SAMPLES = 1000  #屬性
         
         self.INUPT_LENGTH = 0
