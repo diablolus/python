@@ -22,7 +22,7 @@ def get_file_path(folder_path):     #取得wiki所有檔案路徑
 
 def get_file_contents(file_path):   #取得wiki所有text
     all_contents = []
-    rule = '[a-zA-Z0-9’!"#$%&\'()*+,-./:;<=>?@，。?★、…【】《》？“”‘’！[\\]^_`{|}~]+'    #資料處理規則
+    rule = '[a-zA-Z0-9’!"#$%&\'()*+,-./:;<=>?@，。?★、…【】《》；「」：（）？“”‘’！[\\]^_`{|}~]+'    #資料處理規則
 
     for path in file_path:
         with open(path, mode='r', encoding="utf-8") as file:
@@ -30,25 +30,19 @@ def get_file_contents(file_path):   #取得wiki所有text
             
             for line in unformatted_text:  
                 json_text = json.loads(line)
-                formatted_text = re.sub(rule, '', json_text["text"].replace('\n', ''))
+                formatted_text = re.sub(rule, '', json_text["text"].strip().replace('\n', '').replace('\r', '').replace(" ", ""))
                 all_contents.append(formatted_text)
         
     print("get_file_contents")
     return all_contents
 
-def jieba_cal(data, origin_file):
-    word_set = set()
-    
+def jieba_cal(data, origin_file):   
     with open(origin_file , mode='w', encoding="utf-8") as file:
         for value in data:
             temp = jieba.lcut(value)
     
-            for word in temp:
-                if word in word_set:
-                    continue
-                
+            for word in temp:               
                 file.writelines(word+"\n")
-                word_set.add(word)
         
     print("jieba_cal")
     return
@@ -69,13 +63,12 @@ def training_model(input_file):
     print("training")
 
     # Settings
-    seed = 666
+    seed = 432
     sg = 0
-    window_size = 20
-    vector_size = 50
-    min_count = 1
-    workers = 8
-    epochs = 5
+    window_size = 10
+    vector_size = 100
+    min_count = 5
+    epochs = 10
     batch_words = 100000
     
     # Train
@@ -84,7 +77,6 @@ def training_model(input_file):
         train_data,
         min_count=min_count,
         vector_size =vector_size,
-        workers=workers,
         epochs=epochs,
         window=window_size,
         sg=sg,
@@ -97,10 +89,25 @@ def training_model(input_file):
         
     model.save('t.model')
     return
- 
-"""def using_model():
-    model = models.Word2Vec.load('word2vec.model')"""
-    
+
+def test():
+    model = fasttext.FastText.load('t.model')
+
+    print("輸入一個詞，則去尋找前20個該詞的相似詞")
+
+    while True:
+        try:
+            query = input()
+            q_list = query.split()
+
+            if len(q_list) == 1:
+                print("相似詞前 20 排序")
+                res = model.wv.most_similar(q_list[0],topn = 20)
+                for item in res:
+                    print(item[0]+","+str(item[1]))
+
+        except Exception as e:
+            print(repr(e))
 
 def main():
     data_path = './wiki_zh/'        #wiki資料路徑
@@ -108,14 +115,15 @@ def main():
     training_file = "training_data.txt"
     
     #取得資料集
-    """all_file_path = get_file_path(data_path)
+    all_file_path = get_file_path(data_path)
     all_contents = get_file_contents(all_file_path)
     jieba_cal(all_contents, origin_file)
-    trans_text(origin_file ,training_file)"""
+    trans_text(origin_file ,training_file)
         
     print("DataSet is completed")
     
     training_model(training_file)
+    test()
     
 if __name__== "__main__":
     main() 
