@@ -7,9 +7,9 @@ import numpy as np
 class Seq2Seq:
     def __init__(self):
         self.N_UNITS = 256
-        self.BATCH_SIZE = 32
-        self.EPOCH = 1200
-        self.NUM_SAMPLES = 1000  #屬性
+        self.BATCH_SIZE = 16
+        self.EPOCH = 20
+        self.NUM_SAMPLES = 100  #屬性
         
         self.INUPT_LENGTH = 0
         self.OUTPUT_LENGTH = 0
@@ -131,11 +131,11 @@ if __name__== "__main__":
     decoder_infer = tuple2[3]
     target_dict = tuple2[4]
     encoder_input = tuple2[5]
-    
-    for i in range(20,120):
-        test = encoder_input[i:i+1,:,]#i:i+1保持数组是三维
-        #test = ["i love bird"]
+
+    for i in range(20,121):
+        test = encoder_input[i:i+1]#i:i+1保持数组是三维
+        
         out = seq2seq.Predict_Chinese(test,encoder_infer,decoder_infer,seq2seq.OUTPUT_LENGTH,seq2seq.OUTPUT_FEATURE_LENGTH, target_dict, target_dict_reverse)
         #print(input_texts[i],'\n---\n',target_texts[i],'\n---\n',out)
-        print(input_texts[i])
+        #print(input_texts[i])
         print(out)
