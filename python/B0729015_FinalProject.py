@@ -35,7 +35,7 @@ def useless_word(word):
 def create_article_word_dict(data):  #建立所有文章各自的word dict
     all_word = []
     
-    for i in range(0,10):#len(data)
+    for i in range(0,len(data)):#len(data)
         segment = data["segment_context"][i].split('/')
         segment = list(filter(useless_word, segment))    
         all_word.append(segment)
@@ -147,8 +147,9 @@ def get_neighbors(knn_value, k):
 
 #判斷k個最近鄰居的推、噓文數        
 def get_push_down(neighbor, label, k):
-    predict = []
-    num = 0
+    predict_push = []
+    predict_down = []
+
     for data in neighbor:
         push = down = 0
         
@@ -156,22 +157,19 @@ def get_push_down(neighbor, label, k):
             push += label["push"][value]
             down += label["down"][value]
             
-        predict.append([num, push, down])
-        num += 1
+        predict_push.append(push)
+        predict_down.append(down)
     
-    print("get_tag is completed")  
-    return predict
+    print("predict is completed")  
+    return (predict_push, predict_down)
 
-def write_result(csv_name, data):
-    for index, push, down in data:
-        
-        dataframe = pd.DataFrame({'index':index,'push':push,'down':down})
-        dataframe.to_csv(csv_name, index=False, sep=',')
+def write_result(csv_name, push, down):
+    index = list(range(len(push)))
+    dataframe = pd.DataFrame({'index':index, 'push':push, 'down':down})
+    dataframe.to_csv(csv_name, index=False, sep=',')
     
     return
 
-    
-    
 def main():
     train_data = pd.read_csv('train_data.csv')
     train_label = pd.read_csv('train_label.csv')
@@ -198,8 +196,8 @@ def main():
     knn_neighbors = get_neighbors(knn_value, k)
     
     #使用該點附近k個鄰居的推噓文數預測
-    predict = get_push_down(knn_neighbors, train_label, k)
-    write_result(result_data, predict)
+    predict_push, predict_down = get_push_down(knn_neighbors, train_label, k)
+    write_result(result_data, predict_push, predict_down)
     
 if __name__== "__main__":
     main()   
