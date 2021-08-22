@@ -44,8 +44,11 @@ def knn_algo(train_data, test_data, train_label, start, end):
     
 def write_result(csv_name, push, down, start, end):
     index = list(range(start, end))
-    dataframe = pd.DataFrame({'index':index, 'push':push, 'down':down})
-    dataframe.to_csv(csv_name, index=False, sep=',')
+    if start == 0:
+        dataframe = pd.DataFrame({'index':index, 'push':push, 'down':down})
+        dataframe.to_csv(csv_name, mode="w", index=False, sep=',')
+    else:
+        dataframe.to_csv(csv_name, mode="a", index=False, sep=',')
     
     return 
 
@@ -57,8 +60,9 @@ def main():
     
     start = [0,10000,20000,30000]
     end = [10000,20000,30000, len(test_data)]
-    
-    for i in range(4):
+
+    for i in range(0,4):
+        print(i)
         #建立training的前置data
         all_train_word = get_article_word(train_data, start[i], end[i])
         #建立testing的前置data
@@ -66,8 +70,8 @@ def main():
         
         train_weight, test_weight = get_tfidf_value(all_train_word, all_test_word)
         push, down = knn_algo(train_weight, test_weight, train_label, start[i], end[i])
+ 
         write_result(result_data, push, down, start[i], end[i])
-    
     
 if __name__== "__main__":
     main()   
