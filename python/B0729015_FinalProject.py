@@ -128,10 +128,56 @@ def calc_distance_main(tfidf_train, tfidf_test): #計算test point離train point
     print("calc_distance is completed") 
     return knn_value
 
+def get_neighbors(knn_value, k):
+    neighbor = []
 
+    for distance in knn_value:
+        temp = dict()
+
+        for i in range(0, k):
+            min_item = min(distance, key=distance.get)
+            distance.pop(min_item)
+            temp[i] = min_item               #取得最近的點
+                
+        neighbor.append(temp)
+                
+    #print(neighbor)
+    print("get_neighbors is completed")     
+    return neighbor
+
+#判斷k個最近鄰居的推、噓文數        
+def get_push_down(neighbor, label, k):
+    predict = []
+    num = 0
+    for data in neighbor:
+        push = down = 0
+        
+        for value in data.values():
+            push += label["push"][value]
+            down += label["down"][value]
+            
+        predict.append([num, push, down])
+        num += 1
+    
+    print("get_tag is completed")  
+    return predict
+
+def write_result(csv_name, data):
+    for index, push, down in data:
+        
+        dataframe = pd.DataFrame({'index':index,'push':push,'down':down})
+        dataframe.to_csv(csv_name, index=False, sep=',')
+    
+    return
+
+    
+    
 def main():
     train_data = pd.read_csv('train_data.csv')
+    train_label = pd.read_csv('train_label.csv')
     test_data = pd.read_csv('test_data.csv')
+    result_data = "sample_submission.csv"
+    k = 5
     
     get_data_characteristic()       #取得資料特徵
     
@@ -149,6 +195,11 @@ def main():
     
     #取得test與train的距離
     knn_value = calc_distance_main(tfidf_train, tfidf_test)
+    knn_neighbors = get_neighbors(knn_value, k)
+    
+    #使用該點附近k個鄰居的推噓文數預測
+    predict = get_push_down(knn_neighbors, train_label, k)
+    write_result(result_data, predict)
     
 if __name__== "__main__":
     main()   
